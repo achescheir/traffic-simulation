@@ -1,2 +1,2 @@
 
-This is Trisha's part of the merge conflict
+This is Trisha's part of the merge conflict.
