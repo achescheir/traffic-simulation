@@ -102,10 +102,30 @@ def test_getting_distance_of_cars_from_eachother():
     assert b.get_distance(c, a) == 185
     assert b.get_distance(a, c) == 805
 
-
 @raises(ValueError)
 def test_get_distance_of_overlapping_cars():
     b = Road()
     a = Car(location = 0)
     c = Car(location = 2)
     b.get_distance(a,c)
+
+def test_car_should_stop_too_close_too_fast():
+    a = Car(initial_speed = 25)
+    assert a.should_stop(10,10) == True
+
+def test_if_car_should_match_speed():
+    a = Car(initial_speed = 25)
+    assert a.should_match_speed(10) == True
+
+
+# def test_match_speed_of_close_car():
+#     a = Car(initial_speed = 25)
+#     a.sim_tick(distance = 10, speed = 30)
+#     assert a.speed == 27
+#     assert a.location == 27
+#
+# def test_stop_if_collision_possible():
+#     a = Car(initial_speed = 25)
+#     a.sim_tick(distance =  10, speed = 10)
+#     assert a.speed == 0
+#     assert a.location == 0

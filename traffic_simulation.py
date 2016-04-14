@@ -16,11 +16,20 @@ class Car:
     def breaking(self):
         self.speed -= self.acceleration
 
-    def should_speed_up(self):
+    def should_speed_up(self, distance=math.inf, speed_of_next_car=math.inf):
         return self.speed < self.target_speed
 
-    def sim_tick(self):
-        if self.should_speed_up():
+    # def should_stop(self, distance, speed_of_next_car):
+    #     return self.speed - speed_of_next_car > distance
+    #
+    # def should_match_speed(self, distance, speed_of_next_car):
+    #     return distance > self.speed
+    #
+    # def match_speed(self, speed_of_next_car):
+    #     self.speed = speed_of_next_car
+
+    def sim_tick(self, distance=math.inf, speed_of_next_car=math.inf):
+        if self.should_speed_up(distance, speed_of_next_car):
             self.speed_up()
         self.location += self.speed
 
@@ -41,7 +50,7 @@ class Road:
                 self.get_distance(each_car,car)
             except ValueError as e:
                 raise e
-                
+
         self.cars.append(car)
         self.cars.sort(key = lambda x : x.location)
 
