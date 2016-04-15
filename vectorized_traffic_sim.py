@@ -40,6 +40,22 @@ def should_stop(fronts, lengths, speeds, loop_length):
     will_collide = future_distance <= 0
     return np.any(will_collide,axis = 1)
 
+def are_too_close(fronts, lengths, speeds, loop_length):
+    distances = get_distances(fronts, get_rears(fronts, lengths,loop_length), loop_length)
+    difference_of_speeds = get_difference_of_speeds(speeds)
+    future_distance = distances + difference_of_speeds
+    speed_grid, _ = np.meshgrid(speeds, speeds)
+    will_be_too_close = future_distance <= speed_grid
+    return np.any(will_be_too_close,axis = 1)
+
+def are_too_slow(speeds, target_speeds):
+    return speeds < target_speeds
+
+def speed_up(speeds, should_speed_up, target_speeds, accelerations):
+    temporary_speeds = speeds + np.multiply(should_speed_up, accelerations)
+    return np.minimum(temporary_speeds,target_speeds)
+
+
 def main():
     positions = np.linspace(0,999,num = 30, endpoint = False)
     speeds = np.zeros(30)

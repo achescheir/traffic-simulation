@@ -76,12 +76,25 @@ def test_should_stop():
     loop_length = 60
     assert np.array_equal(should_stop(fronts, lengths, speeds, loop_length),[True, False, False, False])
 
-def test_is_too_close():
+def test_are_too_close():
     fronts = np.array([0,10,20,50])
     lengths = np.array([5,5,5,5])
     speeds = [10,2,1,1]
     loop_length = 60
+    are_too_close(fronts, lengths, speeds, loop_length)
     assert np.array_equal(are_too_close(fronts, lengths, speeds, loop_length),[True, False, False, False])
+
+def test_are_too_slow():
+    speeds = np.array([0,20,50,45])
+    target_speeds = np.array([33, 33, 33, 45])
+    assert np.array_equal(are_too_slow(speeds,target_speeds),[True, True, False, False])
+
+def test_speed_up():
+    speeds= [0, 10, 20, 40]
+    should_speed_up=[True, False, True, True]
+    target_speeds=[33,33,21,33]
+    accelerations = [2,2,2,2]
+    assert np.array_equal(speed_up(speeds,should_speed_up,target_speeds,accelerations),[2,10,21,33])
 # def test_change_speed_speed_up():
 #     start_positions = np.array([0,50,100,150,200,250])
 #     start_speeds = 25 * np.ones(6)
