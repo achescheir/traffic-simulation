@@ -46,7 +46,9 @@ def are_too_close(fronts, lengths, speeds, loop_length):
     future_distance = distances + difference_of_speeds
     speed_grid, _ = np.meshgrid(speeds, speeds)
     will_be_too_close = future_distance <= speed_grid
-    return np.any(will_be_too_close,axis = 1)
+    cars_that_are_too_close = np.argwhere(will_be_too_close == True)
+    # print(cars_that_are_too_close)
+    return [[z[1] for z in cars_that_are_too_close if z[0]==a ]for a in range(len(fronts))]
 
 def are_too_slow(speeds, target_speeds):
     return speeds < target_speeds
@@ -54,6 +56,34 @@ def are_too_slow(speeds, target_speeds):
 def speed_up(speeds, should_speed_up, target_speeds, accelerations):
     temporary_speeds = speeds + np.multiply(should_speed_up, accelerations)
     return np.minimum(temporary_speeds,target_speeds)
+
+def slow_down(speeds, should_slow_down,  accelerations):
+    temporary_speeds = speeds - np.multiply(should_speed_up, accelerations)
+    return np.maximum(np.zeros(len(target_speeds)),target_speeds)
+
+def stop_vehicles(speed,vehicles_to_stop):
+    return np.multiply(speed,np.logical_not(vehicles_to_stop))
+
+def speed_up_to_match():
+    pass
+
+def slow_down_to_match():
+    pass
+
+def sim_tick(fronts, lengths, speeds, accelerations, target_speeds, loop_length):
+
+
+    # needs_to_act = np.ones(len(fronts))
+    # needs_to_stop = should_stop(fronts, lengths, speeds, loop_length)
+    # difference_of_speeds = get_difference_of_speeds(speeds)
+    # cars_that_are_too_close = are_too_close(fronts, lengths, speeds, loop_length)
+    # relative_speeds_of_cars_that_are_too_close = [[difference_of_speeds[this_car][too_close] for too_close in too_close_cars] for this_car, too_close_cars in enumerate(cars_that_are_too_close)]
+    # minimum_relative_speeds = []
+    # for each_set_of_speeds in relative_speeds_of_cars_that_are_too_close:
+    #     minimum_relative_speed = None
+    #     if len(each_set_of_speeds) > 0
+    #         minimum_relative_speed = min(each_set_of_speeds)
+    #     minimum_relative_speeds.append(minimum_relative_speed)
 
 
 def main():
