@@ -71,7 +71,7 @@ def slow_down_to_match():
     pass
 
 def sim_tick(fronts, lengths, speeds, accelerations, target_speeds, loop_length):
-
+    pass
 
     # needs_to_act = np.ones(len(fronts))
     # needs_to_stop = should_stop(fronts, lengths, speeds, loop_length)

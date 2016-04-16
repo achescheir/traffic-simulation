@@ -16,6 +16,22 @@ def handle_collisions(positions, lengths, speeds, loop_length, has_changed):
         return speeds, will_collide
     return speeds, has_changed
 
+def handle_too_close(positions, lengths, speeds, target_speeds, loop_length, has_changed):
+    cars_too_close = find_cars_too_close(positions, speeds, lengths, loop_length)
+    for num, car in enumerate(cars_too_close):
+        if car is None:
+            continue
+        else:
+            my_speed = speeds[num]
+            their_speed = speeds[car]
+            if my_speed > their_speed:
+                # slow down, not stop
+                pass
+            else:
+                # speed up unless at target speed
+                pass
+
+
 def handle_speeding_up(speeds, target_speeds, has_changed):
     should_speed_up = speeds < target_speeds
     will_speed_up = np.logical_and(np.logical_not(has_changed), should_speed_up)
@@ -38,6 +54,7 @@ def sim_tick(positions, lengths, speeds, target_speeds, breaking_chances, loop_l
     has_changed = np.zeros(len(positions))
     speeds, has_changed = handle_collisions(positions,lengths,speeds,loop_length, has_changed)
     speeds, has_changed = handle_breaking(speeds, breaking_chances, has_changed)
+    speeds, has_changed = handle_too_close(positions, lengths, speeds, target_speeds, loop_length, has_changed)
     speeds, has_changed = handle_speeding_up(speeds, target_speeds, has_changed)
 
     # print(speeds, "speeds")
@@ -75,12 +92,26 @@ def check_for_collisions(positions, lengths, speeds, loop_length):
     # print(a, "collision_matrix")
     return a
 
+def find_cars_too_close(positions, speeds, lengths, loop_length):
+    distances = distance_between_cars(positions, lengths, loop_length)
+    speed_grid1, speed_grid2 = np.meshgrid(speeds, speeds)
+    too_close = [None] * len(positions)
+    # print(distances, "distances")
+    # print(speed_grid1, "grid 1")
+    # print(speed_grid2, "grid 2")
+    # print(distances < speed_grid2, "comparrison")
+    distances_too_close = distances < speed_grid2
+    a, b = np.nonzero(distances_too_close)
+    for i, j in enumerate(a):
+        too_close[j] = b[i]
+    return too_close
+
+
 def update_history(history, positions,lengths,loop_length, time_point):
     snapshot = np.zeros(loop_length)
     for index, x in enumerate(positions):
         for i in range(int(lengths[index])):
             snapshot[int((x-i)%loop_length)] = index+50
-
     history[time_point] = snapshot
 
 
