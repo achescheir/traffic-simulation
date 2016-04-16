@@ -53,7 +53,7 @@ def handle_breaking(speeds, breaking_chances, has_changed):
     has_changed = np.logical_or(has_changed, will_break)
     slow_down = will_break * (2)
     speeds = speeds - slow_down
-    return speeds, has_changed
+    return np.maximum(speeds, np.zeros(len(speeds))), has_changed
 
 def sim_tick(positions, lengths, speeds, target_speeds, breaking_chances, loop_length):
     has_changed = np.zeros(len(positions))
@@ -112,12 +112,13 @@ def find_cars_too_close(positions, speeds, lengths, loop_length):
     return too_close
 
 
-def update_history(history, positions,lengths,loop_length, time_point):
+def update_history(speed_history, speeds, position_history, positions,lengths,loop_length, time_point):
     snapshot = np.zeros(loop_length)
     for index, x in enumerate(positions):
         for i in range(int(lengths[index])):
             snapshot[int((x-i)%loop_length)] = index+50
-    history[time_point] = snapshot
+    position_history[time_point] = snapshot
+    speed_history[time_point] = speeds.copy()
 
 
 def main():
@@ -131,12 +132,14 @@ def main():
     loop_length = 1000
     sim_length= 300
     speeds[0] = 1
-    history = np.zeros((sim_length+1,loop_length))
-    update_history(history, positions,lengths,loop_length, 0)
+    position_history = np.zeros((sim_length+1,loop_length))
+    speed_history = np.zeros((sim_length+1, number_of_cars))
+    update_history(speed_history, speeds, position_history, positions,lengths,loop_length, 0)
+
     for tick_num in range(sim_length):
         speeds, positions = sim_tick(positions, lengths, speeds, target_speed, breaking_chances, loop_length)
-        update_history(history, positions,lengths,loop_length, tick_num+1)
-    plt.matshow(history,cmap = "Greys")
+        update_history(speed_history, speeds, position_history, positions,lengths,loop_length, tick_num+1)
+    plt.matshow(position_history,cmap = "Greys")
     plt.show()
 
 if __name__ == '__main__':
