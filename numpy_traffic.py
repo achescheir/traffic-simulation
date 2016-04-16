@@ -25,19 +25,30 @@ def handle_speeding_up(speeds, target_speeds, has_changed):
     has_changed = has_changed + will_speed_up
     return speeds, has_changed
 
-def sim_tick(positions, lengths, speeds, target_speeds, loop_length):
+def handle_breaking(speeds, breaking_chances, has_changed):
+    breaking_rolls = np.random.random(len(speeds))
+    should_break = breaking_rolls < breaking_chances
+    will_break = np.logical_and(np.logical_not(has_changed), should_break)
+    has_changed = np.logical_or(has_changed, will_break)
+    slow_down = will_break * (2)
+    speeds = speeds - slow_down
+    return speeds, has_changed
+
+def sim_tick(positions, lengths, speeds, target_speeds, breaking_chances, loop_length):
     has_changed = np.zeros(len(positions))
     speeds, has_changed = handle_collisions(positions,lengths,speeds,loop_length, has_changed)
+    speeds, has_changed = handle_breaking(speeds, breaking_chances, has_changed)
     speeds, has_changed = handle_speeding_up(speeds, target_speeds, has_changed)
+
     # print(speeds, "speeds")
     # print(has_changed, "has_changed")
     return  speeds, get_next_positions(positions, speeds, loop_length)
-        # if will thenstop
-        # else if random breaking break
-        #else if too close
-            #if rear is faster match speeds
-            #if rears is slower accelerate
-        #else if too slow speed up
+        #  if will thenstop
+        #  else if random breaking break
+        # else if too close
+            # if rear is faster match speeds
+            # if rears is slower accelerate
+        # else if too slow speed up
 
 def difference_of_speeds(speeds):
     a, b = np.meshgrid(speeds, speeds)
@@ -47,10 +58,10 @@ def distance_between_cars(positions, lengths, loop_length):
     fronts = positions
     rears = (positions - lengths) % loop_length
     rear_grid, front_grid = np.meshgrid(rears, fronts)
-    print(fronts, "fronts")
-    print(rears, "rears")
+    # print(fronts, "fronts")
+    # print(rears, "rears")
     a = (rear_grid - front_grid) % loop_length
-    print(a)
+    # print(a)
     return a
 
 def check_for_collisions(positions, lengths, speeds, loop_length):
@@ -59,32 +70,37 @@ def check_for_collisions(positions, lengths, speeds, loop_length):
     # print(current_distances,"current_distances\n")
     current_difference_of_speeds = difference_of_speeds(speeds)
     # print(current_difference_of_speeds,"current_difference_of_speeds\n")
-    return np.any(current_distances < current_difference_of_speeds, axis = 1)
+    # print(current_difference_of_speeds,"difference_of_speeds")
+    a = np.any(current_distances < current_difference_of_speeds, axis = 1)
+    # print(a, "collision_matrix")
+    return a
 
+def update_history(history, positions,lengths,loop_length, time_point):
+    snapshot = np.zeros(loop_length)
+    for index, x in enumerate(positions):
+        for i in range(int(lengths[index])):
+            snapshot[int((x-i)%loop_length)] = index+50
+
+    history[time_point] = snapshot
 
 
 def main():
-    number_of_cars = 2
-    # positions = np.linspace(0,999,number_of_cars, endpoint=False)#np.array([0, 994])
-    positions = np.array([10, 20])
+    number_of_cars = 60
+    positions = np.linspace(0,999,number_of_cars, endpoint=False)# np.array([0, 994])
+    #  positions = np.array([10, 20,30])
     lengths = np.ones(number_of_cars) * 5
     speeds = np.ones(number_of_cars) * 0
     target_speed = np.ones(number_of_cars) * 33
-    loop_length = 100
-    sim_length= 6
+    breaking_chances = np.ones(number_of_cars) * .1
+    loop_length = 1000
+    sim_length= 300
     speeds[0] = 1
     history = np.zeros((sim_length+1,loop_length))
-    snapshot = np.zeros(loop_length)
-    for x in positions:
-        snapshot[int(x)] = 1
-    history[0]= snapshot
+    update_history(history, positions,lengths,loop_length, 0)
     for tick_num in range(sim_length):
-        speeds, positions = sim_tick(positions, lengths, speeds, target_speed, loop_length)
-        snapshot = np.zeros(loop_length)
-        for x in positions:
-            snapshot[x] = 1
-        history[tick_num+1]= snapshot
-    plt.matshow(history)
+        speeds, positions = sim_tick(positions, lengths, speeds, target_speed, breaking_chances, loop_length)
+        update_history(history, positions,lengths,loop_length, tick_num+1)
+    plt.matshow(history,cmap = "Greys")
     plt.show()
 
 if __name__ == '__main__':
