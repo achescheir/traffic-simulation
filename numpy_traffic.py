@@ -18,6 +18,7 @@ def handle_collisions(positions, lengths, speeds, loop_length, has_changed):
 
 def handle_too_close(positions, lengths, speeds, target_speeds, loop_length, has_changed):
     cars_too_close = find_cars_too_close(positions, speeds, lengths, loop_length)
+    speed_changes = np.zeros(len(positions))
     for num, car in enumerate(cars_too_close):
         if car is None:
             continue
@@ -26,10 +27,14 @@ def handle_too_close(positions, lengths, speeds, target_speeds, loop_length, has
             their_speed = speeds[car]
             if my_speed > their_speed:
                 # slow down, not stop
-                pass
+                speed_changes[num]= -(min(my_speed, 2, my_speed - their_speed))
             else:
                 # speed up unless at target speed
-                pass
+                speed_changes[num] = (min(2,their_speed - my_speed, target_speeds[num] - my_speed))
+    # print(speed_changes, "speed_changes")
+    speeds = speeds + speed_changes
+    has_changed = np.logical_or(has_changed,speed_changes)
+    return speeds, has_changed
 
 
 def handle_speeding_up(speeds, target_speeds, has_changed):
@@ -118,7 +123,7 @@ def update_history(history, positions,lengths,loop_length, time_point):
 def main():
     number_of_cars = 60
     positions = np.linspace(0,999,number_of_cars, endpoint=False)# np.array([0, 994])
-    #  positions = np.array([10, 20,30])
+    # positions = np.array([10, 20,30])
     lengths = np.ones(number_of_cars) * 5
     speeds = np.ones(number_of_cars) * 0
     target_speed = np.ones(number_of_cars) * 33
